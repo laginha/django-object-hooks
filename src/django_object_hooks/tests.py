@@ -10,6 +10,10 @@ from .signals import hook_event
 NUMBER = 10
 CUSTOM_ACTION = 'died'
 
+def custom_hook_deliverer(app_label, model, instance_pk, action, payload=None):
+    pass
+    
+CUSTOM_HOOK_DELIVERER = 'django_object_hooks.tests.'
 
 class HookTestCase(TestCase):
 
@@ -165,5 +169,12 @@ class HookTestCase(TestCase):
             hook_event.send(sender=User, instance=user, action=CUSTOM_ACTION, payload={})
             self.assertTrue(False)
         except requests.exceptions.ConnectionError:
-            self.assertEqual(Hook.objects.count(), NUMBER+1)            
+            self.assertEqual(Hook.objects.count(), NUMBER+1)
+            
+    def test_custom_hook_deliver(self):
+        with self.settings(HOOK_COLLECTION_DELIVERER=)
+        
+        
+        
+        
         
