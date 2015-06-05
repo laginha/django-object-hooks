@@ -5,8 +5,7 @@ from django.dispatch import Signal, receiver
 from .models import Hook
 
 COLLECTION_DELIVERER = import_string(getattr(settings, 
-    "HOOK_COLLECTION_DELIVERER", 
-    "doh.deliverers.base.deliver_all_hooks"
+    "HOOK_COLLECTION_DELIVERER", "doh.deliverers.deliver_hooks"
 ))
 
 

@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from autofixture import AutoFixture
 from .models import Hook, get_expiration_date
-from .deliverers.base import HooksDeliverer, deliver_hook, deliver_all_hooks
+from .deliverers.base import HooksDeliverer
+from .deliverers import deliver_hook, deliver_hooks
 from .signals import hook_event
 
 
@@ -94,23 +95,23 @@ class HookTestCase(TestCase):
         self.create_hooks(NUMBER)
         ACTION = action or CUSTOM_ACTION
         user = User.objects.latest('id')
-        deliver_all_hooks('auth', 'User', user.pk, ACTION, payload={})
+        deliver_hooks('auth', 'User', user.pk, ACTION, payload={})
         if ACTION == Hook.DEFAULT_ACTION:
             self.assertEqual(Hook.objects.count(), NUMBER-1)
         else:
             self.assertEqual(Hook.objects.count(), NUMBER)
         self.create_hook(user, user, action=ACTION, valid=False)
-        deliver_all_hooks('auth', 'User', user.pk, ACTION, payload={})
+        deliver_hooks('auth', 'User', user.pk, ACTION, payload={})
         self.assertEqual(Hook.objects.count(), NUMBER-1)
         
     def test_deliver_all_with_custom_action_and_valid_target(self, action=None):
         self.create_hooks(NUMBER)
         ACTION = action or CUSTOM_ACTION
         user = User.objects.latest('id')
-        deliver_all_hooks('auth', 'User', user.pk, ACTION, payload={})
+        deliver_hooks('auth', 'User', user.pk, ACTION, payload={})
         self.create_hook(user, user, action=ACTION, valid=True)
         try:
-            deliver_all_hooks('auth', 'User', user.pk, ACTION, payload={})
+            deliver_hooks('auth', 'User', user.pk, ACTION, payload={})
             self.assertTrue(False)
         except requests.exceptions.ConnectionError:
             if ACTION == Hook.DEFAULT_ACTION:

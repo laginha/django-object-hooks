@@ -1,5 +1,5 @@
 import celery
-from .base import HooksDeliverer, HookDeliverer
+from doh.deliverers.base import HooksDeliverer, HookDeliverer
 from .eventlet import EventletDeliverer
 
 
@@ -9,16 +9,7 @@ class HooksDelivererTask(celery.task.Task, HooksDeliverer):
     def run(self, app_label, model, instance_pk, action, payload=None):
         self.deliver(app_label, model, instance_pk, action, payload)
 
-deliver_all_hooks = HooksDelivererTask.delay
-
-
-class EventletDelivererTask(celery.task.Task, EventletDeliverer):
-    ignore_result = False
-
-    def run(self, app_label, model, instance_pk, action, payload=None):
-        self.deliver(app_label, model, instance_pk, action, payload)
-
-deliver_all_hooks = EventletDelivererTask.delay
+deliver_hooks_using_task = HooksDelivererTask.delay
 
 
 class HookDelivererTask(celery.task.Task, HookDeliverer):
@@ -27,4 +18,4 @@ class HookDelivererTask(celery.task.Task, HookDeliverer):
     def run(self, target, payload):
         self.deliver(target, payload)
 
-deliver_hook = HookDeliverer.delay
+deliver_hook_using_task = HookDelivererTask.delay

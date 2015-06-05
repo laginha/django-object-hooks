@@ -49,7 +49,7 @@ class HooksDeliverer(object):
             self.deliver_each(hooks)
         self.after_deliver(hooks)        
 
-deliver_all_hooks = HooksDeliverer().deliver
+deliver_hooks = HooksDeliverer().deliver
 
 
 class HookDeliverer(object):
@@ -69,6 +69,5 @@ deliver_hook = HookDeliverer().deliver
 
 
 DELIVERER = import_string(getattr(settings, 
-    "HOOK_ELEMENT_DELIVERER", 
-    "doh.deliverers.base.deliver_hook"
+    "HOOK_ELEMENT_DELIVERER", "doh.deliverers.base.deliver_hook"
 ))

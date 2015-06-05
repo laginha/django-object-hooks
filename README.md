@@ -77,15 +77,22 @@ By default the deliveres are functions called within the `post_save` signal hand
 
 ```python
 # in settings.py
-HOOK_COLLECTION_DELIVERER = "doh.deliveres.tasks.deliver_all_hooks"
-HOOK_ELEMENT_DELIVERER = "doh.deliveres.tasks.deliver_hook"
+HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_task"
+HOOK_ELEMENT_DELIVERER = "doh.deliveres.deliver_hook_using_task"
 ```
 
-Additionally, you also have a Task+Eventlet based deliverer:
+Additionally, you also have a Eventlet based deliverer:
 
 ```python
-HOOK_COLLECTION_DELIVERER = "doh.deliveres.eventlet.deliver_all_hooks"
+HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet"
 # HOOK_ELEMENT_DELIVERER is not used in this case
+```
+
+or as a task
+
+```python
+HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet_task"
+# HOOK_ELEMENT_DELIVERER is not needed in this case
 ```
 
 ### Override base deliverers
@@ -93,8 +100,7 @@ HOOK_COLLECTION_DELIVERER = "doh.deliveres.eventlet.deliver_all_hooks"
 All the available deliverers rely completely on two base deliveres: `HooksDeliverer` and `HookDeliverer`. From these you can create your own deliverers:
 
 ```python
-from doh.deliverers.base import HooksDeliverer
-from doh.deliverers.base import HookDeliverer
+from doh.deliverers.base import HooksDeliverer, HookDeliverer
 
 class MyCollectionDeliverer(HooksDeliverer):
     def dump_payload(self, payload):
@@ -105,7 +111,7 @@ class MyCollectionDeliverer(HooksDeliverer):
         # you may use this method to do some logging
         logger.info('foobar')
 
-deliver_all_hooks = MyCollectionDeliverer.deliver
+custom_deliver_hooks = MyCollectionDeliverer.deliver
 
 
 class MyDeliverer(HookDeliverer):
@@ -114,6 +120,6 @@ class MyDeliverer(HookDeliverer):
         if response.status_code in [404, 410]:
             Hook.object.filter(target=response.url).delete()            
 
-deliver_hook = MyDeliverer.deliver
+custom_deliver_hook = MyDeliverer.deliver
 ```
 
