@@ -2,8 +2,8 @@
 from django.apps import AppConfig
 
 class DOHConfig(AppConfig):
-    name = 'django_object_hooks'
-    verbose_name = "Django Object Hook"
+    name = 'doh'
+    verbose_name = "Django Object Hooks"
 
     def ready(self):
         super(DOHConfig, self).ready()

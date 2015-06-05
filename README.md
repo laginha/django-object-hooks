@@ -56,7 +56,7 @@ class Vehicle(models.Model):
 ### Send custom signals
 
 ```python
-from django_object_hooks.signals import hook_event
+from doh.signals import hook_event
 
 hook_event.send(sender=Vehicle, instance=bus55, action='crashed', payload={})
 ```
@@ -72,24 +72,28 @@ There are two configurable deliverers that play a part in notifying the targets:
 
 ### Use celery
 
-By default the deliveres are functions called within the `post_save` signal handling. However, you can override the settings to use Celery-Tasks driven deliverers
+By default the deliveres are functions called within the `post_save` signal handling. However, you can override the settings to use Celery-Tasks based deliverers
 
 ```python
 # in settings.py
-HOOK_COLLECTION_DELIVERER = "django_object_hooks.tasks.deliver_all_hooks"
-HOOK_ELEMENT_DELIVERER = "django_object_hooks.tasks.deliver_hook"
+HOOK_COLLECTION_DELIVERER = "doh.deliveres.tasks.deliver_all_hooks"
+HOOK_ELEMENT_DELIVERER = "doh.deliveres.tasks.deliver_hook"
 ```
 
-There are 4 possible combinations of deliverers. Use the one you think it is best for you.
+Additionally, you also have a Task+Eventlet based deliverer:
 
+```python
+HOOK_COLLECTION_DELIVERER = "doh.deliveres.eventlet.deliver_all_hooks"
+# HOOK_ELEMENT_DELIVERER is not used in this case
+```
 
 ### Override base deliverers
 
 Both the default and task-driven deliverers rely completely on two base deliveres: `AllHooksDeliverer` and `HookDeliverer`. From these you can create your own deliverers:
 
 ```python
-from django_object_hooks.utils import AllHooksDeliverer
-from django_object_hooks.utils import HookDeliverer
+from doh.deliverers.base import AllHooksDeliverer
+from doh.deliverers.base import HookDeliverer
 
 class MyCollectionDeliverer(AllHooksDeliverer):
     def dump_payload(self, payload):
