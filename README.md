@@ -43,14 +43,15 @@ class Vehicle(models.Model):
     def get_static_payload(self):
         # if this method exists, the payload will be fetched only once
         # and used for every hook within an event for this model
-        return {
-            'foo': 'bar'
-        }
+        return model_to_dict(self)
         
     def get_dynamic_payload(self, hook):
         # if this method exists, the payload will be fetched for each
         # hook in any event for this model
-        return model_to_dict(hook.content_object)
+        return {
+            'resource_uri': 'http://foo.com/vehicles/{pk}'.format(pk=self.pk)
+            'action': hook.action,
+        }
 ```
 
 ### Send custom signals
@@ -89,7 +90,7 @@ HOOK_COLLECTION_DELIVERER = "doh.deliveres.eventlet.deliver_all_hooks"
 
 ### Override base deliverers
 
-Both the default and task-driven deliverers rely completely on two base deliveres: `AllHooksDeliverer` and `HookDeliverer`. From these you can create your own deliverers:
+All the available deliverers rely completely on two base deliveres: `AllHooksDeliverer` and `HookDeliverer`. From these you can create your own deliverers:
 
 ```python
 from doh.deliverers.base import AllHooksDeliverer
