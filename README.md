@@ -54,6 +54,7 @@ class Vehicle(models.Model):
         }
 ```
 
+
 ### Send custom signals
 
 ```python
@@ -76,24 +77,29 @@ There are two configurable deliverers that play a part in notifying the targets:
 By default the deliveres are functions called within the `post_save` signal handling. However, you can override the settings to use Celery-Tasks based deliverers
 
 ```python
-# in settings.py
 HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_task"
 HOOK_ELEMENT_DELIVERER = "doh.deliveres.deliver_hook_using_task"
 ```
 
-Additionally, you also have a Eventlet based deliverer:
+You can just override one setting thus combining with the default deliverers.
+
+
+### Use eventlet
+
+You can also use Eventlet based deliverers:
 
 ```python
 HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet"
-# HOOK_ELEMENT_DELIVERER is not used in this case
 ```
 
 or as a task
 
 ```python
 HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet_task"
-# HOOK_ELEMENT_DELIVERER is not needed in this case
 ```
+
+> `HOOK_ELEMENT_DELIVERER` is not used in this case.
+
 
 ### Override base deliverers
 
@@ -102,7 +108,7 @@ All the available deliverers rely completely on two base deliveres: `HooksDelive
 ```python
 from doh.deliverers.base import HooksDeliverer, HookDeliverer
 
-class MyCollectionDeliverer(HooksDeliverer):
+class CustomHooksDeliverer(HooksDeliverer):
     def dump_payload(self, payload):
         # you may override this method to use simplejson instead of ujson
         return simplejson.dumps(payload)
@@ -111,15 +117,14 @@ class MyCollectionDeliverer(HooksDeliverer):
         # you may use this method to do some logging
         logger.info('foobar')
 
-custom_deliver_hooks = MyCollectionDeliverer.deliver
+custom_deliver_hooks = CustomHooksDeliverer.deliver
 
 
-class MyDeliverer(HookDeliverer):
+class CustomHookDeliverer(HookDeliverer):
     def after_deliver(self, response):
         # you may use this method to delete hooks
         if response.status_code in [404, 410]:
             Hook.object.filter(target=response.url).delete()            
 
-custom_deliver_hook = MyDeliverer.deliver
+custom_deliver_hook = CustomHookDeliverer.deliver
 ```
-
