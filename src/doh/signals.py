@@ -6,7 +6,7 @@ from .models import Hook
 
 COLLECTION_DELIVERER = import_string(getattr(settings, 
     "HOOK_COLLECTION_DELIVERER", 
-    "django_object_hooks.deliverers.base.deliver_all_hooks"
+    "doh.deliverers.base.deliver_all_hooks"
 ))
 
 

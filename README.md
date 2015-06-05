@@ -90,13 +90,13 @@ HOOK_COLLECTION_DELIVERER = "doh.deliveres.eventlet.deliver_all_hooks"
 
 ### Override base deliverers
 
-All the available deliverers rely completely on two base deliveres: `AllHooksDeliverer` and `HookDeliverer`. From these you can create your own deliverers:
+All the available deliverers rely completely on two base deliveres: `HooksDeliverer` and `HookDeliverer`. From these you can create your own deliverers:
 
 ```python
-from doh.deliverers.base import AllHooksDeliverer
+from doh.deliverers.base import HooksDeliverer
 from doh.deliverers.base import HookDeliverer
 
-class MyCollectionDeliverer(AllHooksDeliverer):
+class MyCollectionDeliverer(HooksDeliverer):
     def dump_payload(self, payload):
         # you may override this method to use simplejson instead of ujson
         return simplejson.dumps(payload)

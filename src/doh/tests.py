@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from autofixture import AutoFixture
 from .models import Hook, get_expiration_date
-from .utils import AllHooksDeliverer, deliver_hook, deliver_all_hooks
+from .deliverers.base import HooksDeliverer, deliver_hook, deliver_all_hooks
 from .signals import hook_event
 
 
@@ -71,10 +71,10 @@ class HookTestCase(TestCase):
             for each in Hook.objects.all():
                 self.assertEqual(each.expiration_date.year, each.creation_date.date().year +1)
 
-    def test_AllHooksDeliverer(self):
+    def test_HooksDeliverer(self):
         self.create_hooks(NUMBER)
         hooked_user = User.objects.latest('id')
-        deliverer = AllHooksDeliverer()
+        deliverer = HooksDeliverer()
         hooks = deliverer.filter_hooks(
             'auth', 'User', hooked_user.pk, Hook.DEFAULT_ACTION
         )

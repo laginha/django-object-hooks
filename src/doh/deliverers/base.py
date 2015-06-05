@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.db.models.loading import get_model
 from django.utils.module_loading import import_string
-from django_object_hooks.models import Hook
+from doh.models import Hook
 
 
 class HooksDeliverer(object):
@@ -70,5 +70,5 @@ deliver_hook = HookDeliverer().deliver
 
 DELIVERER = import_string(getattr(settings, 
     "HOOK_ELEMENT_DELIVERER", 
-    "django_object_hooks.deliverers.base.deliver_hook"
+    "doh.deliverers.base.deliver_hook"
 ))
