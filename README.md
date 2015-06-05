@@ -67,7 +67,7 @@ hook_event.send(sender=Vehicle, instance=bus55, action='crashed', payload={})
 There are two configurable deliverers that play a part in notifying the targets:
 
 - `HOOK_COLLECTION_DELIVERER` which is responsible for filtering the `Hook` model, dumping/serializing each payload and send it to the next deliverer
-- `HOOK_DELIVERER` which is responsible to send an HTTP POST request to a target with a given payload
+- `HOOK_ELEMENT_DELIVERER` which is responsible to send an HTTP POST request to a single target with a given payload
 
 
 ### Use celery
