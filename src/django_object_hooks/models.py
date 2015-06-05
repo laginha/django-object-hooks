@@ -8,15 +8,15 @@ from .managers import HookQuerySet
 
 
 def get_expiration_date():
-    today = datetime.date.today()
-    return today.replace(
+    now = datetime.datetime.now()
+    return now.replace(
         year=today.year +getattr(settings, "HOOK_EXPIRATION_DATE_DELTA", 10)
     )
 
 
 class Hook(models.Model):
     DEFAULT_ACTION = 'changed'
-    expiration_date = models.DateField(default=get_expiration_date, db_index=True)
+    expiration_date = models.DateTimeField(default=get_expiration_date, db_index=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
