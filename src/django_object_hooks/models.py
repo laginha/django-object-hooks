@@ -1,16 +1,16 @@
-import datetime
 from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.validators import URLValidator
+from django.utils import timezone
 from .managers import HookQuerySet
 
 
 def get_expiration_date():
-    now = datetime.datetime.now()
+    now = timezone.now()
     return now.replace(
-        year=today.year +getattr(settings, "HOOK_EXPIRATION_DATE_DELTA", 10)
+        year=now.year +getattr(settings, "HOOK_EXPIRATION_DATE_DELTA", 10)
     )
 
 

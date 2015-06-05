@@ -6,23 +6,28 @@ from django.conf import settings
 from django.db.models import Q
 from django.db.models.loading import get_model
 from django.utils.module_loading import import_string
-from .models import Hook
+from django_object_hooks.models import Hook
 
 
-class AllHooksDeliverer(object):
-    DEFAULT_DUMP = ujson.dumps({})
+class HooksDeliverer(object):
+    DEFAULT_DUMP = "{}"
+
+    def dump_payload(self, payload):
+        if isinstance(payload, basestring):
+            return payload
+        return ujson.dumps(payload)
 
     def deliver_each(self, hooks, payload=None): 
         if payload != None:
-            dump = ujson.dumps(payload)
+            dump = self.dump_payload(payload)
         for each in hooks:
             if payload == None:
                 instance = each.content_object
                 if hasattr(instance, 'get_static_payload'):
                     payload = instance.get_static_payload(each)
-                    dump = ujson.dumps( payload )
+                    dump = self.dump_payload( payload )
                 elif hasattr(instance, 'get_dynamic_payload'):
-                    dump = ujson.dumps( instance.get_dynamic_payload(each) )
+                    dump = self.dump_payload( instance.get_dynamic_payload(each) )
                 else:
                     dump = self.DEFAULT_DUMP
             DELIVERER(each.target, dump)
@@ -33,7 +38,7 @@ class AllHooksDeliverer(object):
             model=model, object_id=instance_pk, action=action
         )
     
-    def after_deliver(self):
+    def after_deliver(self, hooks):
         return
             
     def deliver(self, app_label, object_name, instance_pk, action, payload=None):
@@ -42,9 +47,9 @@ class AllHooksDeliverer(object):
             self.deliver_each(hooks, payload=payload)
         else:
             self.deliver_each(hooks)
-        self.after_deliver()        
+        self.after_deliver(hooks)        
 
-deliver_all_hooks = AllHooksDeliverer().deliver
+deliver_all_hooks = HooksDeliverer().deliver
 
 
 class HookDeliverer(object):
@@ -63,8 +68,7 @@ class HookDeliverer(object):
 deliver_hook = HookDeliverer().deliver
 
 
-
 DELIVERER = import_string(getattr(settings, 
-    "HOOK_DELIVERER", 
-    "django_object_hooks.utils.deliver_hook"
+    "HOOK_ELEMENT_DELIVERER", 
+    "django_object_hooks.deliverers.base.deliver_hook"
 ))

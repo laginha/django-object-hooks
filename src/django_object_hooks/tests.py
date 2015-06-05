@@ -1,6 +1,7 @@
 import requests
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from autofixture import AutoFixture
 from .models import Hook, get_expiration_date
 from .utils import AllHooksDeliverer, deliver_hook, deliver_all_hooks
@@ -10,10 +11,6 @@ from .signals import hook_event
 NUMBER = 10
 CUSTOM_ACTION = 'died'
 
-def custom_hook_deliverer(app_label, model, instance_pk, action, payload=None):
-    pass
-    
-CUSTOM_HOOK_DELIVERER = 'django_object_hooks.tests.'
 
 class HookTestCase(TestCase):
 
@@ -46,11 +43,25 @@ class HookTestCase(TestCase):
     def delete_all_hooks(self):
         Hook.objects.all().delete()
 
+    def test_validate_and_save(self):
+        user = self.create_users(1)[0]
+        hook = Hook(user=user, target='http://example.com', content_object=user)
+        try:
+            hook.validate_and_save()
+        except ValidationError:
+            self.assertTrue(False)
+        hook = Hook(user=user, target='example.com', content_object=user)
+        try:
+            hook.validate_and_save()
+            self.assertTrue(False)
+        except ValidationError:
+            self.assertTrue(True)
+
     def test_default_expiration_date_delta(self):
         self.create_hooks(NUMBER)
-        default_expiration_date = get_expiration_date()
+        default_expiration_date = get_expiration_date().date()
         for each in Hook.objects.all():
-            self.assertEqual(each.expiration_date, default_expiration_date)
+            self.assertEqual(each.expiration_date.date(), default_expiration_date)
             self.assertEqual(each.expiration_date.year, each.creation_date.date().year +10)
             
     def test_custom_expiration_date_delta(self):
@@ -170,11 +181,5 @@ class HookTestCase(TestCase):
             self.assertTrue(False)
         except requests.exceptions.ConnectionError:
             self.assertEqual(Hook.objects.count(), NUMBER+1)
-            
-    def test_custom_hook_deliver(self):
-        with self.settings(HOOK_COLLECTION_DELIVERER=)
-        
-        
-        
         
         

@@ -6,7 +6,7 @@ from .models import Hook
 
 COLLECTION_DELIVERER = import_string(getattr(settings, 
     "HOOK_COLLECTION_DELIVERER", 
-    "django_object_hooks.utils.deliver_all_hooks"
+    "django_object_hooks.deliverers.base.deliver_all_hooks"
 ))
 
 
@@ -27,6 +27,7 @@ def handle_hook_event(sender, instance, action, payload=None):
 @receiver(hook_event, dispatch_uid="doh_hook_event_handler")
 def on_hook_event(sender, instance, action=Hook.DEFAULT_ACTION, payload=None, **kwargs):
     return handle_hook_event(sender, instance, action, payload)
+
 
 @receiver(post_save, dispatch_uid="doh_post_save_handler")
 def on_post_save(sender, instance, created, **kwargs):
