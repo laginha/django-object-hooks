@@ -22,19 +22,17 @@ create web hooks:
 ```python
 vehicle = Vehicle.objects.get(type='bus', name='55')
 Hook.objects.create(
-    user=user, 
-    content_object=vehicle,
+    user=user, content_object=vehicle,
     target='http://www.example.com/vehicles',
 )
 ```
 
 and that's it! 
-Whenever vehicle is saved, DOH handles the `post_save` signal and initiates the hook delivering process.
+
+Whenever a `vehicle` is saved, DOH handles the `post_save` signal and initiates the hook delivering process.
 
 
 ### Define payload
-
-By default the payload in each request per hook is an empty json (`{}`). However you may define payloads per model as follows:
 
 ```python
 class Vehicle(models.Model):
@@ -54,6 +52,8 @@ class Vehicle(models.Model):
         }
 ```
 
+By default the payload is an empty json (`{}`).
+
 
 ### Send custom signals
 
@@ -64,17 +64,13 @@ hook_event.send(sender=Vehicle, instance=bus55, action='crashed', payload={})
 ```
 
 
-## Delivering hooks
+## Deliverers
 
-There are two configurable deliverers that play a part in notifying the targets:
-
-- `HOOK_COLLECTION_DELIVERER` which is responsible for filtering the `Hook` model, dumping/serializing each payload and send it to the next deliverer
-- `HOOK_ELEMENT_DELIVERER` which is responsible to send an HTTP POST request to a single target with a given payload
+- `HOOK_COLLECTION_DELIVERER`: define the deliverer responsible for filtering the `Hook` model and dumping each payload.
+- `HOOK_ELEMENT_DELIVERER` define the deliverer responsible for sending a POST request to a target with a given payload.
 
 
 ### Use celery
-
-By default the deliveres are functions called within the `post_save` signal handling. However, you can override the settings to use Celery-Tasks based deliverers
 
 ```python
 HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_task"
@@ -86,13 +82,11 @@ You can just override one setting thus combining with the default deliverers.
 
 ### Use eventlet
 
-You can also use Eventlet based deliverers:
-
 ```python
 HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet"
 ```
 
-or as a task
+or
 
 ```python
 HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet_task"
@@ -103,7 +97,7 @@ HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet_task"
 
 ### Override base deliverers
 
-All the available deliverers rely completely on two base deliveres: `HooksDeliverer` and `HookDeliverer`. From these you can create your own deliverers:
+Create your own custom deliverers from `HooksDeliverer` and `HookDeliverer`:
 
 ```python
 from doh.deliverers.base import HooksDeliverer, HookDeliverer
