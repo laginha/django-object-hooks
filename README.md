@@ -66,8 +66,8 @@ hook_event.send(sender=Vehicle, instance=bus55, action='crashed', payload={})
 
 ## Deliverers
 
-- `HOOK_COLLECTION_DELIVERER`: define the deliverer responsible for filtering the `Hook` model and dumping each payload.
-- `HOOK_ELEMENT_DELIVERER` define the deliverer responsible for sending a POST request to a target with a given payload.
+- `HOOK_COLLECTION_DELIVERER`: responsible for filtering the `Hook` model and dumping each payload.
+- `HOOK_ELEMENT_DELIVERER`: responsible for sending a POST request to a target with a given payload.
 
 
 ### Use celery
@@ -95,7 +95,7 @@ HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet_task"
 > `HOOK_ELEMENT_DELIVERER` is not used in this case.
 
 
-### Override base deliverers
+### Custom deliverers
 
 Create your own custom deliverers from `HooksDeliverer` and `HookDeliverer`:
 
@@ -105,13 +105,14 @@ from doh.deliverers.base import HooksDeliverer, HookDeliverer
 class CustomHooksDeliverer(HooksDeliverer):
     def dump_payload(self, payload):
         # you may override this method to use simplejson instead of ujson
-        return simplejson.dumps(payload)
+        return simplejson.dumps(payload)        
 
     def after_deliver(self, hooks):
         # you may use this method to do some logging
         logger.info('foobar')
 
-custom_deliver_hooks = CustomHooksDeliverer.deliver
+deliver_hooks = CustomHooksDeliverer.deliver
+deliver_hooks_using_task = CustomHooksDeliverer.delay
 
 
 class CustomHookDeliverer(HookDeliverer):
@@ -120,5 +121,6 @@ class CustomHookDeliverer(HookDeliverer):
         if response.status_code in [404, 410]:
             Hook.object.filter(target=response.url).delete()            
 
-custom_deliver_hook = CustomHookDeliverer.deliver
+deliver_hook = CustomHookDeliverer.deliver
+deliver_hook_using_task = CustomHookDeliverer.delay
 ```

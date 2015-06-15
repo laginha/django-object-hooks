@@ -82,7 +82,7 @@ class HookTestCase(TestCase):
         self.assertEqual(hooks.count(), 1)
         self.assertEqual(hooks[0].user, User.objects.all()[0])
         self.assertEqual(hooks[0].content_object, hooked_user)
-        deliverer.deliver_each(hooks, {'foo':'bar'})
+        deliverer.deliver_hooks(hooks, {'foo':'bar'})
         self.assertEqual(Hook.objects.count(), NUMBER-1)
         
     def test_deliver_all(self):

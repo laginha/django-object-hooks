@@ -1,23 +1,32 @@
 import datetime
 import ujson
 import requests
+import celery
 from requests.exceptions import MissingSchema, InvalidSchema, InvalidURL
-from django.conf import settings
 from django.db.models import Q
 from django.db.models.loading import get_model
+from django.conf import settings
 from django.utils.module_loading import import_string
 from doh.models import Hook
+from .mixins import DelivererMixin
 
 
-class HooksDeliverer(object):
+class HooksDeliverer(celery.task.Task, DelivererMixin):
     DEFAULT_DUMP = "{}"
 
     def dump_payload(self, payload):
         if isinstance(payload, basestring):
             return payload
         return ujson.dumps(payload)
-
-    def deliver_each(self, hooks, payload=None): 
+        
+    def deliver_to_target(self, target, data):
+        if not hasattr(self, '_deliverer'):
+            self._deliverer = import_string(getattr(settings, 
+                "HOOK_ELEMENT_DELIVERER", "doh.deliverers.deliver_hook"
+            ))
+        return self._deliverer(target, data)
+    
+    def delivering(self, hooks, payload=None):
         if payload != None:
             dump = self.dump_payload(payload)
         for each in hooks:
@@ -30,7 +39,11 @@ class HooksDeliverer(object):
                     dump = self.dump_payload( instance.get_dynamic_payload(each) )
                 else:
                     dump = self.DEFAULT_DUMP
-            DELIVERER(each.target, dump)
+            yield self.deliver_to_target(each.target, dump)
+    
+    def deliver_hooks(self, hooks, payload=None): 
+        for each in self.delivering(hooks, payload):
+            continue
     
     def filter_hooks(self, app_label, object_name, instance_pk, action):
         model = get_model(app_label, object_name)
@@ -39,25 +52,24 @@ class HooksDeliverer(object):
         )
     
     def after_deliver(self, hooks):
-        return
-            
-    def deliver(self, app_label, object_name, instance_pk, action, payload=None):
+        return              
+
+    def run(self, app_label, object_name, instance_pk, action, payload=None):
         hooks = self.filter_hooks(app_label, object_name, instance_pk, action)
         if payload != None:
-            self.deliver_each(hooks, payload=payload)
+            self.deliver_hooks(hooks, payload=payload)
         else:
-            self.deliver_each(hooks)
-        self.after_deliver(hooks)        
+            self.deliver_hooks(hooks)
+        self.after_deliver(hooks)
+    
 
-deliver_hooks = HooksDeliverer().deliver
-
-
-class HookDeliverer(object):
+class HookDeliverer(celery.task.Task, DelivererMixin): 
+           
     def after_deliver(self, response):
         if response.status_code == 410:
             Hook.object.filter(target=response.url).delete()
 
-    def deliver(self, target, payload):
+    def run(self, target, payload):
         try:
             response = requests.post(target, data=payload)
         except (MissingSchema, InvalidSchema, InvalidURL) as e:
@@ -65,9 +77,3 @@ class HookDeliverer(object):
         else:
             self.after_deliver(response)
 
-deliver_hook = HookDeliverer().deliver
-
-
-DELIVERER = import_string(getattr(settings, 
-    "HOOK_ELEMENT_DELIVERER", "doh.deliverers.base.deliver_hook"
-))
