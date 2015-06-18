@@ -8,8 +8,8 @@ reqs = [str(each.req) for each in install_reqs if each.req]
 
 
 setup(
-    name             = 'Django Object Hooks',
-    version          = '1.0.0',
+    name             = 'django-object-hooks',
+    version          = '1.0.1',
     author           = "Diogo Laginha",
     author_email     = "diogo.laginha.machado@gmail.com",
     url              = 'https://github.com/laginha/django-object-hooks',
