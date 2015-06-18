@@ -6,6 +6,9 @@ Object-level Web Hook application.
 
 This project was heavily influence by [django-rest-hooks](https://github.com/zapier/django-rest-hooks).
 
+## Install
+
+    pip install django_objects_hooks
 
 ## Basic usage
 
