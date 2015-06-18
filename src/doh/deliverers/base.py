@@ -47,7 +47,7 @@ class HooksDeliverer(celery.task.Task, DelivererMixin):
     
     def filter_hooks(self, app_label, object_name, instance_pk, action):
         model = get_model(app_label, object_name)
-        return Hook.objects.fetch(
+        return Hook.queryset.fetch(
             model=model, object_id=instance_pk, action=action
         )
     

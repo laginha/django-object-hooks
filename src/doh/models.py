@@ -31,7 +31,8 @@ class Hook(models.Model):
     object_id = models.PositiveIntegerField(db_index=True)
     content_object = GenericForeignKey('content_type', 'object_id')
     
-    objects = HookQuerySet.manager()
+    objects = models.Manager() 
+    queryset = HookQuerySet.manager()
     
     def validate_and_save(self):
         models.URLField().run_validators(self.target)

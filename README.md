@@ -12,8 +12,12 @@ This project was heavily influence by [django-rest-hooks](https://github.com/zap
 setup your settings:
 
 ```python
+INSTALLED_APPS = (
+    ...
+    'doh', # mandatory
+)
 HOOK_ALLOWED_MODELS = [
-    'app.Vehicle
+    'yourapp.Vehicle # example
 ]
 ```
 
