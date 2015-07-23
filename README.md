@@ -20,7 +20,7 @@ INSTALLED_APPS = (
     'doh', # mandatory
 )
 HOOK_ALLOWED_MODELS = [
-    'yourapp.Vehicle # example
+    'yourapp.Vehicle' # example
 ]
 ```
 
@@ -80,23 +80,23 @@ hook_event.send(sender=Vehicle, instance=bus55, action='crashed', payload={})
 ### Use celery
 
 ```python
-HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_task"
-HOOK_ELEMENT_DELIVERER = "doh.deliveres.deliver_hook_using_task"
+HOOK_COLLECTION_DELIVERER = "doh.deliverers.deliver_hooks_using_task"
+HOOK_ELEMENT_DELIVERER = "doh.deliverers.deliver_hook_using_task"
 ```
 
 You can just override one setting thus combining with the default deliverers.
 
 
-### Use eventlet
+### Use gevents
 
 ```python
-HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet"
+HOOK_COLLECTION_DELIVERER = "doh.deliverers.deliver_hooks_using_gevent"
 ```
 
 or
 
 ```python
-HOOK_COLLECTION_DELIVERER = "doh.deliveres.deliver_hooks_using_eventlet_task"
+HOOK_COLLECTION_DELIVERER = "doh.deliverers.deliver_hooks_using_gevent_task"
 ```
 
 > `HOOK_ELEMENT_DELIVERER` is not used in this case.
