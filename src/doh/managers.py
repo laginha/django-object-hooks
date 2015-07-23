@@ -1,16 +1,9 @@
-import datetime
-from django.db.models import query
+from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from model_utils.managers import PassThroughManager
+import datetime
 
-
-class QuerySetManager(query.QuerySet):
-    @classmethod
-    def manager(cls):
-        return PassThroughManager.for_queryset_class(cls)()
         
-        
-class HookQuerySet(QuerySetManager):
+class HookQuerySet(models.QuerySet):
     def with_content_type(self, model):
         ct = ContentType.objects.get_for_model(model)
         return self.filter(content_type__pk=ct.pk)

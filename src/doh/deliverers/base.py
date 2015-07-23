@@ -1,14 +1,16 @@
+from django.db.models import Q
+from django.db.models.loading import get_model
+from django.conf import settings
+from requests.exceptions import MissingSchema
+from requests.exceptions import InvalidSchema
+from requests.exceptions import InvalidURL
+from django.utils.module_loading import import_string
+from doh.models import Hook
+from .mixins import DelivererMixin
 import datetime
 import ujson
 import requests
 import celery
-from requests.exceptions import MissingSchema, InvalidSchema, InvalidURL
-from django.db.models import Q
-from django.db.models.loading import get_model
-from django.conf import settings
-from django.utils.module_loading import import_string
-from doh.models import Hook
-from .mixins import DelivererMixin
 
 
 class HooksDeliverer(celery.task.Task, DelivererMixin):
@@ -47,7 +49,7 @@ class HooksDeliverer(celery.task.Task, DelivererMixin):
     
     def filter_hooks(self, app_label, object_name, instance_pk, action):
         model = get_model(app_label, object_name)
-        return Hook.queryset.fetch(
+        return Hook.objects.fetch(
             model=model, object_id=instance_pk, action=action
         )
     

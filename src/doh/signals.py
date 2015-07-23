@@ -13,7 +13,7 @@ hook_event = Signal(providing_args=['instance', 'action', 'payload'])
 
 
 def handle_hook_event(sender, instance, action, payload=None):
-    if Hook.queryset.fetch(model=instance, action=action).exists():
+    if Hook.objects.fetch(model=instance, action=action).exists():
         return COLLECTION_DELIVERER(
             app_label=sender._meta.app_label, 
             object_name=sender._meta.object_name,
