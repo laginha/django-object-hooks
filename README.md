@@ -8,7 +8,7 @@ This project was heavily influence by [django-rest-hooks](https://github.com/zap
 
 ## Install
 
-    pip install django_objects_hooks
+    pip install django-objects-hooks
 
 ## Basic usage
 

@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.db.models.loading import get_model
 from django.conf import settings
 from requests.exceptions import MissingSchema
 from requests.exceptions import InvalidSchema
@@ -11,6 +10,11 @@ import datetime
 import ujson
 import requests
 import celery
+try:
+    from django.apps import apps
+    get_model = apps.get_model
+except ImportError:
+    from django.db.models.loading import get_model
 
 
 class HooksDeliverer(celery.task.Task, DelivererMixin):
