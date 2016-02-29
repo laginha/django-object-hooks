@@ -7,14 +7,14 @@ except ImportError:
 from django.contrib.contenttypes.models import ContentType
 from django.core.validators import URLValidator
 from django.utils import timezone
+from datetime import timedelta
 from .managers import HookQuerySet
 
 
 def get_expiration_date():
     now = timezone.now()
-    return now.replace(
-        year=now.year +getattr(settings, "HOOK_EXPIRATION_DATE_DELTA", 10)
-    )
+    return now + timedelta(
+        days=365 * getattr(settings, "HOOK_EXPIRATION_DATE_DELTA", 10))
 
 
 class Hook(models.Model):
